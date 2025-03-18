@@ -1,5 +1,7 @@
 Challenge Amigo Secreto
 
+Link: https://challenge-amigo-secreto-nine-delta.vercel.app/
+
 Este é um projeto simples de sorteio de amigo secreto, desenvolvido com HTML, CSS e JavaScript puro. O objetivo é permitir que os usuários adicionem nomes a uma lista e realizem um sorteio aleatório para determinar o amigo secreto.
 
 Funcionalidades:
