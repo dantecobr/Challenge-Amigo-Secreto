@@ -86,237 +86,228 @@
         ];
 
 // =======================================================
-        // 2. CONFIGURAÇÃO DA URL DE REVELAÇÃO (MANTIDA)
-        // =======================================================
-        const urlBaseRevelacao = "revelacao.html"; 
+    // 2. CONFIGURAÇÃO DA URL DE REVELAÇÃO (CORRIGIDA PARA VERCEL)
+    // =======================================================
+    const urlBaseRevelacao = "https://challenge-amigo-secreto-nine-delta.vercel.app/revelacao.html"; 
 
-        // =======================================================
-        // FUNÇÕES PARA GERENCIAR A LISTA DINAMICAMENTE
-        // =======================================================
+    // =======================================================
+    // FUNÇÕES PARA GERENCIAR A LISTA DINAMICAMENTE
+    // =======================================================
 
-        function renderizarLista() {
-            const ul = document.getElementById('lista-participantes');
-            ul.innerHTML = '';
-            document.getElementById('count-participantes').textContent = participantes.length;
-            
-            if (participantes.length === 0) {
-                ul.innerHTML = '<li>Nenhum participante na lista. Adicione um!</li>';
-                return;
-            }
-
-            participantes.forEach((p, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <strong>${p.nome}</strong> - ZAP: ${p.zap || 'N/A'}
-                    <button class="remover-btn" onclick="removerParticipante(${index})">Remover</button>
-                `;
-                ul.appendChild(li);
-            });
-        }
+    function renderizarLista() {
+        const ul = document.getElementById('lista-participantes');
+        ul.innerHTML = '';
+        document.getElementById('count-participantes').textContent = participantes.length;
         
-        function adicionarParticipante() {
-            const nomeInput = document.getElementById('input-nome');
-            const zapInput = document.getElementById('input-zap');
-            
-            const nome = nomeInput.value.trim();
-            const zap = zapInput.value.trim().replace(/\D/g, ''); // Remove não-dígitos
-            
-            if (nome === "") {
-                alert("O campo Nome é obrigatório.");
+        if (participantes.length === 0) {
+            ul.innerHTML = '<li>Nenhum participante na lista. Adicione um!</li>';
+            return;
+        }
+
+        participantes.forEach((p, index) => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <strong>${p.nome}</strong> - ZAP: ${p.zap || 'N/A'}
+                <button class="remover-btn" onclick="removerParticipante(${index})">Remover</button>
+            `;
+            ul.appendChild(li);
+        });
+    }
+    
+    function adicionarParticipante() {
+        const nomeInput = document.getElementById('input-nome');
+        const zapInput = document.getElementById('input-zap');
+        
+        const nome = nomeInput.value.trim();
+        const zap = zapInput.value.trim().replace(/\D/g, ''); 
+        
+        if (nome === "") {
+            alert("O campo Nome é obrigatório.");
+            return;
+        }
+
+        if (zap.length < 12 || !zap.startsWith('55')) {
+             if (confirm("O número do WhatsApp parece incompleto (Use 55 DDD NÚMERO). Deseja adicionar mesmo assim?")) {
+             } else {
                 return;
-            }
+             }
+        }
 
-            // Verifica se o WhatsApp está no formato 55 DDD NUMERO
-            if (zap.length < 12 || !zap.startsWith('55')) {
-                 if (confirm("O número do WhatsApp parece incompleto (Use 55 DDD NÚMERO). Deseja adicionar mesmo assim?")) {
-                    // Continua com o número incompleto ou vazio
-                 } else {
-                    return;
-                 }
-            }
+        participantes.push({ 
+            nome: nome, 
+            zap: zap, 
+            amigoSecreto: "" 
+        });
 
-            // Adiciona o novo participante no array
-            participantes.push({ 
-                nome: nome, 
-                zap: zap, 
-                amigoSecreto: "" 
-            });
+        nomeInput.value = '';
+        zapInput.value = '';
+        renderizarLista();
+    }
 
-            // Limpa o formulário e atualiza a lista visual
-            nomeInput.value = '';
-            zapInput.value = '';
+    function removerParticipante(index) {
+        if (confirm(`Tem certeza que deseja remover ${participantes[index].nome}?`)) {
+            participantes.splice(index, 1);
             renderizarLista();
         }
+    }
 
-        function removerParticipante(index) {
-            if (confirm(`Tem certeza que deseja remover ${participantes[index].nome}?`)) {
-                participantes.splice(index, 1);
-                renderizarLista();
+    // =======================================================
+    // 3. LÓGICA DE SORTEIO E REGRAS ESPECIAIS
+    // =======================================================
+
+    function realizarSorteio() {
+        if (participantes.length < 2) {
+            alert("É necessário pelo menos dois participantes para sortear!");
+            return;
+        }
+
+        participantes.forEach(p => p.amigoSecreto = "");
+
+        const nomes = participantes.map(p => p.nome);
+        let nomesDisponiveis = [...nomes];
+
+        // --- APLICAR REGRAS FIXAS ---
+        
+        const regrasFixas = [
+            { quemSorteia: "Júlia", sorteia: "Ana Maria" }, 
+            { quemSorteia: "Rodolfo", sorteia: "Ronaldo" }
+        ];
+
+        const pessoasJaSorteadas = [];
+
+        for (const regra of regrasFixas) {
+            const sorteador = participantes.find(p => p.nome === regra.quemSorteia);
+            if (sorteador) {
+                sorteador.amigoSecreto = regra.sorteia;
+                pessoasJaSorteadas.push(regra.quemSorteia);
+                
+                const idx = nomesDisponiveis.indexOf(regra.sorteia);
+                if (idx > -1) {
+                    nomesDisponiveis.splice(idx, 1);
+                }
             }
         }
 
-        // =======================================================
-        // 3. LÓGICA DE SORTEIO E REGRAS ESPECIAIS
-        // =======================================================
-
-        function realizarSorteio() {
-            if (participantes.length < 2) {
-                alert("É necessário pelo menos dois participantes para sortear!");
-                return;
-            }
-
-            // Reseta os sorteios
-            participantes.forEach(p => p.amigoSecreto = "");
-
-            const nomes = participantes.map(p => p.nome);
+        // --- REALIZAR SORTEIO ALEATÓRIO PARA O RESTANTE ---
+        
+        const participantesParaSortear = participantes.filter(p => !pessoasJaSorteadas.includes(p.nome));
+        
+        let sucesso = false;
+        let tentativas = 0;
+        
+        while (!sucesso && tentativas < 100) {
+            tentativas++;
+            const listaEmbaralhada = [...nomesDisponiveis].sort(() => 0.5 - Math.random());
+            sucesso = true;
             
-            // Nomes que precisam ser sorteados para alguém
-            let nomesDisponiveis = [...nomes];
-
-            // --- APLICAR REGRAS FIXAS ---
-            
-            const regrasFixas = [
-                { quemSorteia: "Júlia", sorteia: "Ana Maria" }, 
-                { quemSorteia: "Rodolfo", sorteia: "Ronaldo" }
-            ];
-
-            const pessoasJaSorteadas = [];
-
-            for (const regra of regrasFixas) {
-                const sorteador = participantes.find(p => p.nome === regra.quemSorteia);
-                if (sorteador) {
-                    sorteador.amigoSecreto = regra.sorteia;
-                    pessoasJaSorteadas.push(regra.quemSorteia);
-                    
-                    const idx = nomesDisponiveis.indexOf(regra.sorteia);
-                    if (idx > -1) {
-                        nomesDisponiveis.splice(idx, 1);
-                    }
+            for (let i = 0; i < participantesParaSortear.length; i++) {
+                const pessoa = participantesParaSortear[i];
+                const sorteado = listaEmbaralhada[i];
+                
+                if (pessoa.nome === sorteado) {
+                    sucesso = false; 
+                    break; 
                 }
             }
 
-            // --- REALIZAR SORTEIO ALEATÓRIO PARA O RESTANTE ---
-            
-            const participantesParaSortear = participantes.filter(p => !pessoasJaSorteadas.includes(p.nome));
-            
-            let sucesso = false;
-            let tentativas = 0;
-            
-            while (!sucesso && tentativas < 100) {
-                tentativas++;
-                const listaEmbaralhada = [...nomesDisponiveis].sort(() => 0.5 - Math.random());
-                sucesso = true;
-                
+            if (sucesso) {
                 for (let i = 0; i < participantesParaSortear.length; i++) {
-                    const pessoa = participantesParaSortear[i];
-                    const sorteado = listaEmbaralhada[i];
-                    
-                    if (pessoa.nome === sorteado) {
-                        sucesso = false; 
-                        break; 
-                    }
-                }
-
-                if (sucesso) {
-                    for (let i = 0; i < participantesParaSortear.length; i++) {
-                        participantesParaSortear[i].amigoSecreto = listaEmbaralhada[i];
-                    }
+                    participantesParaSortear[i].amigoSecreto = listaEmbaralhada[i];
                 }
             }
+        }
+        
+        if (tentativas >= 100) {
+            alert("Falha no sorteio aleatório. Tente novamente.");
+            return;
+        }
+
+        gerarLinksWhatsApp();
+    }
+    
+    function getRecipientInfo(participante) {
+        let recipientName = participante.nome;
+        let recipientZap = participante.zap;
+        let drawnName = participante.amigoSecreto;
+        
+        // --- Lógica de Ayô ---
+        if (participante.nome === "Ayô") {
+            const glauzio = participantes.find(p => p.nome === "Gláucio");
+            const anny = participantes.find(p => p.nome === "Anny Kelly");
             
-            if (tentativas >= 100) {
-                alert("Falha no sorteio aleatório. Tente novamente ou verifique se as regras fixas tornam o sorteio impossível.");
-                return;
+            if (drawnName === "Gláucio" && anny) {
+                recipientName = `Anny Kelly (Responsável por Ayô)`;
+                recipientZap = anny.zap;
+            } else if (drawnName === "Anny Kelly" && glauzio) {
+                recipientName = `Gláucio (Responsável por Ayô)`;
+                recipientZap = glauzio.zap;
+            } else if (glauzio) {
+                recipientName = `Gláucio (Responsável por Ayô)`;
+                recipientZap = glauzio.zap;
             }
-
-            // GERAÇÃO DOS LINKS
-            gerarLinksWhatsApp();
         }
-        
-        function getRecipientInfo(participante) {
-            let recipientName = participante.nome;
-            let recipientZap = participante.zap;
-            let drawnName = participante.amigoSecreto;
+
+        // --- Lógica de Ravi ---
+        if (participante.nome === "Ravi") {
+            const rodolfo = participantes.find(p => p.nome === "Rodolfo");
+            const anamaria = participantes.find(p => p.nome === "Ana Maria"); 
+
+            if (drawnName === "Rodolfo" && anamaria) {
+                recipientName = `Ana Maria (Responsável por Ravi)`; 
+                recipientZap = anamaria.zap;
+            } else if (rodolfo) {
+                recipientName = `Rodolfo (Responsável por Ravi)`;
+                recipientZap = rodolfo.zap;
+            }
+        }
+
+        // --- Lógica de Júlia ---
+        if (participante.nome === "Júlia") {
+            const rodolfo = participantes.find(p => p.nome === "Rodolfo"); 
+            if (rodolfo) {
+                recipientName = `Responsável por Júlia (${rodolfo.nome})`;
+                recipientZap = rodolfo.zap;
+            }
+        }
+
+        return { recipientName, recipientZap, drawnName };
+    }
+    
+    function gerarLinksWhatsApp() {
+        const container = document.getElementById('links-de-envio');
+        container.innerHTML = ''; 
+
+        participantes.forEach(p => {
+            const { recipientName, recipientZap, drawnName } = getRecipientInfo(p);
             
-            // --- Lógica de Ayô (Pais: Gláucio e Anny Kelly) ---
-            if (participante.nome === "Ayô") {
-                const glauzio = participantes.find(p => p.nome === "Gláucio");
-                const anny = participantes.find(p => p.nome === "Anny Kelly");
-                
-                if (drawnName === "Gláucio" && anny) {
-                    recipientName = `Anny Kelly (Responsável por Ayô)`;
-                    recipientZap = anny.zap;
-                } else if (drawnName === "Anny Kelly" && glauzio) {
-                    recipientName = `Gláucio (Responsável por Ayô)`;
-                    recipientZap = glauzio.zap;
-                } else if (glauzio) {
-                    recipientName = `Gláucio (Responsável por Ayô)`;
-                    recipientZap = glauzio.zap;
-                }
+            if (!recipientZap || recipientZap.length < 10) {
+                 const divElement = document.createElement('div');
+                 divElement.classList.add('link-pronto');
+                 divElement.style.backgroundColor = '#f8d7da';
+                 divElement.innerHTML = `<p><strong>ERRO:</strong> ${p.nome} / ${recipientName} não tem número de WhatsApp válido. Sorteado: ${drawnName}. Envie o link <code>${urlBaseRevelacao}#${encodeURIComponent(drawnName)}</code> manualmente.</p>`;
+                 container.appendChild(divElement);
+                 return;
             }
 
-            // --- Lógica de Ravi (Pai: Rodolfo / Conflito: Ana Maria) ---
-            if (participante.nome === "Ravi") {
-                const rodolfo = participantes.find(p => p.nome === "Rodolfo");
-                const anamaria = participantes.find(p => p.nome === "Ana Maria"); 
+            // O link que leva o segredo (drawnName) via hash.
+            const linkRevelacao = `${urlBaseRevelacao}#${encodeURIComponent(drawnName)}`;
+            
+            // Mensagem formatada: isola o link e foca em quem o participante tirou.
+            const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo a revelação do Amigo Secreto de *${p.nome}*.%0A%0AClique no link abaixo para descobrir quem *${p.nome}* tirou:%0A%0A${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
+            
+            // Cria o link final wa.me
+            const linkWhatsApp = `https://wa.me/${recipientZap}?text=${encodeURIComponent(mensagem)}`;
 
-                if (drawnName === "Rodolfo" && anamaria) {
-                    recipientName = `Ana Maria (Responsável por Ravi)`; 
-                    recipientZap = anamaria.zap;
-                } else if (rodolfo) {
-                    recipientName = `Rodolfo (Responsável por Ravi)`;
-                    recipientZap = rodolfo.zap;
-                }
-            }
-
-            // --- Lógica de Júlia (Responsável: Rodolfo) ---
-            if (participante.nome === "Júlia") {
-                const rodolfo = participantes.find(p => p.nome === "Rodolfo"); 
-                if (rodolfo) {
-                    recipientName = `Responsável por Júlia (${rodolfo.nome})`;
-                    recipientZap = rodolfo.zap;
-                }
-            }
-
-            return { recipientName, recipientZap, drawnName };
-        }
-        
-        function gerarLinksWhatsApp() {
-            const container = document.getElementById('links-de-envio');
-            container.innerHTML = ''; 
-
-            participantes.forEach(p => {
-                const { recipientName, recipientZap, drawnName } = getRecipientInfo(p);
-                
-                if (!recipientZap || recipientZap.length < 10) {
-                     const divElement = document.createElement('div');
-                     divElement.classList.add('link-pronto');
-                     divElement.style.backgroundColor = '#f8d7da';
-                     // Esta linha ainda exibe o nome sorteado para você, caso haja um ERRO no ZAP.
-                     divElement.innerHTML = `<p><strong>ERRO:</strong> ${p.nome} / ${recipientName} não tem número de WhatsApp válido. Sorteado: ${drawnName}. Envie o link <code>${urlBaseRevelacao}#${encodeURIComponent(drawnName)}</code> manualmente.</p>`;
-                     container.appendChild(divElement);
-                     return;
-                }
-
-                // O link que leva o segredo (drawnName) via hash para a página de revelação.
-                const linkRevelacao = `${urlBaseRevelacao}#${encodeURIComponent(drawnName)}`;
-                
-                // Mensagem que o destinatário do ZAP (recipientName) receberá.
-                const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo a revelação do Amigo Secreto de *${p.nome}*.%0A%0AClique no link abaixo para descobrir quem *${p.nome}* tirou:%0A%0A${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
-                
-                // Cria o link final wa.me
-                const linkWhatsApp = `https://wa.me/${recipientZap}?text=${encodeURIComponent(mensagem)}`;
-
-                const divElement = document.createElement('div');
-                divElement.classList.add('link-pronto');
-                divElement.innerHTML = `
-                    <p><strong>Para: ${p.nome}</strong> | Destinatário do Zap: <strong>${recipientName}</strong></p>
-                    <a href="${linkWhatsApp}" target="_blank">📲 Clique para Abrir o WhatsApp e Enviar</a>
-                    `;
-                container.appendChild(divElement);
-            });
-        }
-        
-        // Inicializa a lista ao carregar a página
-        window.onload = renderizarLista;
-    </script>
+            const divElement = document.createElement('div');
+            divElement.classList.add('link-pronto');
+            divElement.innerHTML = `
+                <p><strong>Para: ${p.nome}</strong> | Destinatário do Zap: <strong>${recipientName}</strong></p>
+                <a href="${linkWhatsApp}" target="_blank">📲 Clique para Abrir o WhatsApp e Enviar</a>
+            `;
+            container.appendChild(divElement);
+        });
+    }
+    
+    // Inicializa a lista ao carregar a página
+    window.onload = renderizarLista;
+</script>
