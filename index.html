@@ -73,16 +73,16 @@
         let participantes = [
             { nome: "Ana Clara", zap: "558496634604", amigoSecreto: "" },
             { nome: "Dante Marques", zap: "558496013344", amigoSecreto: "" },
-            //{ nome: "Kallyny", zap: "558487938890", amigoSecreto: "" },
-            //{ nome: "Rodolfo", zap: "558499303180", amigoSecreto: "" },
-            //{ nome: "Júlia", zap: "558499303180", amigoSecreto: "" }, // ZAP: Rodolfo
-            //{ nome: "Ana Maria", zap: "558499101380", amigoSecreto: "" },
-            //{ nome: "Ronaldo", zap: "558487464446", amigoSecreto: "" },
-            //{ nome: "Ton", zap: "558496636715", amigoSecreto: "" },
-            //{ nome: "Anny Kelly", zap: "558487848323", amigoSecreto: "" },
-            //{ nome: "Gláucio", zap: "558496104467", amigoSecreto: "" },
-            //{ nome: "Ayô", zap: "558496104467", amigoSecreto: "" }, // ZAP: Gláucio
-            //{ nome: "Ravi", zap: "558499303180", amigoSecreto: "" } // ZAP: Rodolfo
+            { nome: "Kallyny", zap: "558487938890", amigoSecreto: "" },
+            { nome: "Rodolfo", zap: "558499303180", amigoSecreto: "" },
+            { nome: "Júlia", zap: "558499303180", amigoSecreto: "" }, // ZAP: Rodolfo
+            { nome: "Ana Maria", zap: "558499101380", amigoSecreto: "" },
+            { nome: "Ronaldo", zap: "558487464446", amigoSecreto: "" },
+            { nome: "Ton", zap: "558496636715", amigoSecreto: "" },
+            { nome: "Anny Kelly", zap: "558487848323", amigoSecreto: "" },
+            { nome: "Gláucio", zap: "558496104467", amigoSecreto: "" },
+            { nome: "Ayô", zap: "558496104467", amigoSecreto: "" }, // ZAP: Gláucio
+            { nome: "Ravi", zap: "558499303180", amigoSecreto: "" } // ZAP: Rodolfo
         ];
 
         // =======================================================
@@ -156,7 +156,7 @@
         }
 
         // =======================================================
-        // 3. LÓGICA DE SORTEIO E REGRAS ESPECIAIS (MANTIDA)
+        // 3. LÓGICA DE SORTEIO E REGRAS ESPECIAIS
         // =======================================================
 
         function realizarSorteio() {
@@ -229,9 +229,10 @@
                 return;
             }
 
-// =======================================================
-        // FUNÇÃO DE AUXÍLIO PARA DEFINIR O DESTINATÁRIO (NÃO ALTERADA)
-        // =======================================================
+            // GERAÇÃO DOS LINKS
+            gerarLinksWhatsApp();
+        }
+        
         function getRecipientInfo(participante) {
             let recipientName = participante.nome;
             let recipientZap = participante.zap;
@@ -280,9 +281,6 @@
             return { recipientName, recipientZap, drawnName };
         }
         
-        // =======================================================
-        // FUNÇÃO DE GERAÇÃO E EXIBIÇÃO DE LINKS (CORRIGIDA)
-        // =======================================================
         function gerarLinksWhatsApp() {
             const container = document.getElementById('links-de-envio');
             container.innerHTML = ''; 
@@ -299,11 +297,10 @@
                      return;
                 }
 
-                // O link que será clicável, SEM o nome do amigo secreto na mensagem.
+                // Geração do link de revelação que esconde o nome na mensagem.
                 const linkRevelacao = `${urlBaseRevelacao}#${encodeURIComponent(drawnName)}`;
                 
-                // Mensagem limpa: removemos a quebra de linha após o link para garantir a clicabilidade
-                // e ajustamos o texto inicial para evitar problemas de codificação.
+                // Mensagem formatada para garantir a clicabilidade e esconder o nome.
                 const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo o link do Amigo Secreto de *${p.nome}*. Clique no link abaixo para descobrir quem você tirou: ${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
                 
                 // Cria o link final wa.me
