@@ -85,7 +85,7 @@
             //{ nome: "Ravi", zap: "558499303180", amigoSecreto: "" } 
         ];
 
-        // =======================================================
+// =======================================================
         // 2. CONFIGURAÇÃO DA URL DE REVELAÇÃO (MANTIDA)
         // =======================================================
         const urlBaseRevelacao = "revelacao.html"; 
@@ -297,11 +297,15 @@
                      return;
                 }
 
-                // Geração do link de revelação que esconde o nome na mensagem.
+                // 1. O link de revelação que esconde o nome na mensagem.
                 const linkRevelacao = `${urlBaseRevelacao}#${encodeURIComponent(drawnName)}`;
                 
-                // Mensagem formatada para garantir a clicabilidade e esconder o nome.
-                const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo o link do Amigo Secreto de *${p.nome}*. Clique no link abaixo para descobrir quem você tirou: ${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
+                // 2. Mensagem formatada:
+                // Usando quebras de linha (2x %0A) ANTES e DEPOIS da URL
+                // e a URL deve ser completa (http/https). Para URLs relativas (revelacao.html),
+                // o WhatsApp geralmente precisa que ela esteja isolada para ser clicável.
+                
+                const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo a revelação do Amigo Secreto de *${p.nome}*.%0A%0AClique no link abaixo para descobrir quem foi sorteado para ${p.nome}:%0A%0A${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
                 
                 // Cria o link final wa.me
                 const linkWhatsApp = `https://wa.me/${recipientZap}?text=${encodeURIComponent(mensagem)}`;
