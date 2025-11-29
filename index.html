@@ -281,7 +281,7 @@
             return { recipientName, recipientZap, drawnName };
         }
         
-        function gerarLinksWhatsApp() {
+function gerarLinksWhatsApp() {
             const container = document.getElementById('links-de-envio');
             container.innerHTML = ''; 
 
@@ -297,15 +297,11 @@
                      return;
                 }
 
-                // 1. O link de revelação que esconde o nome na mensagem.
+                // O link de revelação que esconde o nome na mensagem.
                 const linkRevelacao = `${urlBaseRevelacao}#${encodeURIComponent(drawnName)}`;
                 
-                // 2. Mensagem formatada:
-                // Usando quebras de linha (2x %0A) ANTES e DEPOIS da URL
-                // e a URL deve ser completa (http/https). Para URLs relativas (revelacao.html),
-                // o WhatsApp geralmente precisa que ela esteja isolada para ser clicável.
-                
-                const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo a revelação do Amigo Secreto de *${p.nome}*.%0A%0AClique no link abaixo para descobrir quem foi sorteado para ${p.nome}:%0A%0A${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
+                // Mensagem formatada para garantir a clicabilidade e esconder o nome.
+                const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo a revelação do Amigo Secreto de *${p.nome}*.%0A%0AClique no link abaixo para descobrir quem você tirou:%0A%0A${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
                 
                 // Cria o link final wa.me
                 const linkWhatsApp = `https://wa.me/${recipientZap}?text=${encodeURIComponent(mensagem)}`;
@@ -315,8 +311,7 @@
                 divElement.innerHTML = `
                     <p><strong>Para: ${p.nome}</strong> | Destinatário do Zap: <strong>${recipientName}</strong></p>
                     <a href="${linkWhatsApp}" target="_blank">📲 Clique para Abrir o WhatsApp e Enviar</a>
-                    <p style="font-size: 0.8em; margin-top: 5px;">Link Gerado: <code>${linkRevelacao}</code> (Amigo: ${drawnName})</p>
-                `;
+                    `;
                 container.appendChild(divElement);
             });
         }
