@@ -1,23 +1,88 @@
-<script>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início - Gerenciador de Amigo Secreto</title>
+    <style>
+        /* ESTILOS CSS PARA MELHORAR O VISUAL */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+        h1 { color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-top: 0; }
+        h2 { color: #333; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; margin-top: 30px; }
+        
+        /* Estilos do Formulário */
+        .form-group { margin-bottom: 15px; display: flex; gap: 10px; }
+        .form-group input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; flex-grow: 1; }
+        .form-group button { background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; }
+        .form-group button:hover { background-color: #1e7e34; }
+
+        /* Estilos do Botão Principal */
+        #btn-sortear { padding: 15px 25px; font-size: 18px; cursor: pointer; background-color: #d9534f; color: white; border: none; border-radius: 8px; transition: background-color 0.3s; width: 100%; margin-top: 20px; margin-bottom: 30px; font-weight: bold; }
+        #btn-sortear:hover { background-color: #c9302c; }
+
+        /* Lista de Participantes */
+        #lista-participantes { list-style: none; padding: 0; }
+        #lista-participantes li { background-color: #e9ecef; padding: 10px 15px; border-radius: 5px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.95em; }
+        .remover-btn { background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 0.8em; transition: background-color 0.3s; }
+        .remover-btn:hover { background-color: #c82333; }
+        
+        /* Links Prontos */
+        .links-header { color: #5cb85c; margin-top: 40px; font-weight: bold; }
+        .link-pronto { background-color: #e6ffe6; padding: 15px; margin-top: 10px; border-radius: 5px; border-left: 5px solid #28a745; word-wrap: break-word; }
+        .link-pronto a { color: #007bff; font-weight: bold; text-decoration: none; }
+        code { background-color: #eee; padding: 2px 4px; border-radius: 3px; font-size: 0.9em; }
+
+        /* Alertas e avisos */
+        .alerta { background-color: #ffc107; padding: 12px; border-radius: 5px; margin-bottom: 20px; color: #333; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎁 Gerenciador de Sorteio de Amigo Secreto</h1>
+        <p class="alerta">
+            <strong>ATENÇÃO:</strong> Esta é a página de administração. O link de revelação que será enviado aos participantes é a <code>revelacao.html</code>.
+        </p>
+
+        <h2>1. Adicionar Novo Participante</h2>
+        <div class="form-group">
+            <input type="text" id="input-nome" placeholder="Nome Completo" required>
+            <input type="text" id="input-zap" placeholder="WhatsApp (Ex: 5584999999999)" required>
+            <button onclick="adicionarParticipante()">Adicionar à Lista</button>
+        </div>
+        
+        <h2>2. Lista Atual de Participantes (<span id="count-participantes">0</span>)</h2>
+        <ul id="lista-participantes">
+            </ul>
+        
+        <hr>
+        <h2 class="links-header">3. Realizar Sorteio e Enviar</h2>
+        <button id="btn-sortear" onclick="realizarSorteio()">🔥 Realizar Sorteio e Gerar Links</button>
+        
+        <h3>Links Prontos para Envio:</h3>
+        <div id="links-de-envio">
+            <p>A lista de links aparecerá aqui após o sorteio.</p>
+        </div>
+    </div>
+
+    <script>
         // =======================================================
-        // 1. DADOS INICIAIS (COM CORREÇÃO PARA ZAP DA JÚLIA)
+        // 1. DADOS INICIAIS (COM TODAS AS REGRAS E ZAPS)
         // =======================================================
         let participantes = [
-            // Os dados aqui serão carregados para a lista visual!
-            // Os campos 'amigoSecreto' e 'parentInfo' serão preenchidos durante o sorteio.
             { nome: "Ana Clara", zap: "558496634604", amigoSecreto: "" },
             { nome: "Dante Marques", zap: "558496013344", amigoSecreto: "" },
             { nome: "Kallyny", zap: "558487938890", amigoSecreto: "" },
             { nome: "Rodolfo", zap: "558499303180", amigoSecreto: "" },
-            // ZAP ATUALIZADO: Júlia usa o ZAP de Rodolfo
-            { nome: "Júlia", zap: "558499303180", amigoSecreto: "" }, 
+            { nome: "Júlia", zap: "558499303180", amigoSecreto: "" }, // ZAP: Rodolfo
             { nome: "Ana Maria", zap: "558499101380", amigoSecreto: "" },
             { nome: "Ronaldo", zap: "558487464446", amigoSecreto: "" },
             { nome: "Ton", zap: "558496636715", amigoSecreto: "" },
             { nome: "Anny Kelly", zap: "558487848323", amigoSecreto: "" },
             { nome: "Gláucio", zap: "558496104467", amigoSecreto: "" },
-            { nome: "Ayô", zap: "558496104467", amigoSecreto: "" },
-            { nome: "Ravi", zap: "558499303180", amigoSecreto: "" }
+            { nome: "Ayô", zap: "558496104467", amigoSecreto: "" }, // ZAP: Gláucio
+            { nome: "Ravi", zap: "558499303180", amigoSecreto: "" } // ZAP: Rodolfo
         ];
 
         // =======================================================
@@ -32,6 +97,7 @@
         function renderizarLista() {
             const ul = document.getElementById('lista-participantes');
             ul.innerHTML = '';
+            document.getElementById('count-participantes').textContent = participantes.length;
             
             if (participantes.length === 0) {
                 ul.innerHTML = '<li>Nenhum participante na lista. Adicione um!</li>';
@@ -41,7 +107,7 @@
             participantes.forEach((p, index) => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    ${p.nome} - ZAP: ${p.zap || 'N/A'}
+                    <strong>${p.nome}</strong> - ZAP: ${p.zap || 'N/A'}
                     <button class="remover-btn" onclick="removerParticipante(${index})">Remover</button>
                 `;
                 ul.appendChild(li);
@@ -90,7 +156,7 @@
         }
 
         // =======================================================
-        // 3. LÓGICA DE SORTEIO E REGRAS ESPECIAIS (NÃO ALTERADA)
+        // 3. LÓGICA DE SORTEIO E REGRAS ESPECIAIS (MANTIDA)
         // =======================================================
 
         function realizarSorteio() {
@@ -205,7 +271,6 @@
 
             // --- Lógica de Júlia (Responsável: Rodolfo) ---
             if (participante.nome === "Júlia") {
-                // DESTINATÁRIO ATUALIZADO: Rodolfo
                 const rodolfo = participantes.find(p => p.nome === "Rodolfo"); 
                 if (rodolfo) {
                     recipientName = `Responsável por Júlia (${rodolfo.nome})`;
@@ -250,3 +315,5 @@
         // Inicializa a lista ao carregar a página
         window.onload = renderizarLista;
     </script>
+</body>
+</html>
