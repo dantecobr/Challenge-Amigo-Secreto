@@ -281,7 +281,7 @@
             return { recipientName, recipientZap, drawnName };
         }
         
-function gerarLinksWhatsApp() {
+        function gerarLinksWhatsApp() {
             const container = document.getElementById('links-de-envio');
             container.innerHTML = ''; 
 
@@ -292,16 +292,17 @@ function gerarLinksWhatsApp() {
                      const divElement = document.createElement('div');
                      divElement.classList.add('link-pronto');
                      divElement.style.backgroundColor = '#f8d7da';
+                     // Esta linha ainda exibe o nome sorteado para você, caso haja um ERRO no ZAP.
                      divElement.innerHTML = `<p><strong>ERRO:</strong> ${p.nome} / ${recipientName} não tem número de WhatsApp válido. Sorteado: ${drawnName}. Envie o link <code>${urlBaseRevelacao}#${encodeURIComponent(drawnName)}</code> manualmente.</p>`;
                      container.appendChild(divElement);
                      return;
                 }
 
-                // O link de revelação que esconde o nome na mensagem.
+                // O link que leva o segredo (drawnName) via hash para a página de revelação.
                 const linkRevelacao = `${urlBaseRevelacao}#${encodeURIComponent(drawnName)}`;
                 
-                // Mensagem formatada para garantir a clicabilidade e esconder o nome.
-                const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo a revelação do Amigo Secreto de *${p.nome}*.%0A%0AClique no link abaixo para descobrir quem você tirou:%0A%0A${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
+                // Mensagem que o destinatário do ZAP (recipientName) receberá.
+                const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo a revelação do Amigo Secreto de *${p.nome}*.%0A%0AClique no link abaixo para descobrir quem *${p.nome}* tirou:%0A%0A${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
                 
                 // Cria o link final wa.me
                 const linkWhatsApp = `https://wa.me/${recipientZap}?text=${encodeURIComponent(mensagem)}`;
