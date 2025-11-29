@@ -1,133 +1,192 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Sorteio de Amigo Secreto</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .participante-item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-        .link-pronto { background-color: #e6ffe6; padding: 10px; margin-top: 10px; border-radius: 5px; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; }
-        h3 { border-bottom: 2px solid #007bff; padding-bottom: 5px; }
-    </style>
-</head>
-<body>
+<script>
+    // =======================================================
+    // 1. DADOS INICIAIS (ATUALIZADOS COM TODOS OS NOMES E ZAPS)
+    // ATENÇÃO: Os números de Júlia, Ayô e Ravi foram atribuídos aos seus responsáveis
+    // para que a função de envio funcione. A lógica do destinatário está em getRecipientInfo.
+    // =======================================================
+    const participantes = [
+        { nome: "Ana Clara", zap: "558496634604", amigoSecreto: "" },
+        { nome: "Dante Marques", zap: "558496013344", amigoSecreto: "" },
+        { nome: "Kallyny", zap: "558487938890", amigoSecreto: "" },
+        { nome: "Rodolfo", zap: "558499303180", amigoSecreto: "" },
+        { nome: "Júlia", zap: "558496634604", amigoSecreto: "" }, // 
+        { nome: "Ana Maria", zap: "558499101380", amigoSecreto: "" },
+        { nome: "Ronaldo", zap: "558487464446", amigoSecreto: "" },
+        { nome: "Ton", zap: "558496636715", amigoSecreto: "" },
+        { nome: "Anny Kelly", zap: "558487848323", amigoSecreto: "" },
+        { nome: "Gláucio", zap: "558496104467", amigoSecreto: "" },
+        { nome: "Ayô", zap: "558496104467", amigoSecreto: "" }, // ZAP: Gláucio (Será usado como primário)
+        { nome: "Ravi", zap: "558499303180", amigoSecreto: "" }  // ZAP: Rodolfo (Será usado como primário)
+    ];
 
-    <h1>Administração do Amigo Secreto</h1>
+    // =======================================================
+    // 2. CONFIGURAÇÃO DA URL DE REVELAÇÃO (MANTIDA)
+    // =======================================================
+    const urlBaseRevelacao = "revelacao.html"; 
 
-    <p><strong>ATENÇÃO:</strong> Antes de sortear, certifique-se de que a variável <code>urlBaseRevelacao</code> no código JavaScript abaixo está correta (o endereço onde você vai hospedar a página <code>revelacao.html</code>).</p>
+    // =======================================================
+    // 3. FUNÇÃO DE SORTEIO COM REGRAS FIXAS
+    // =======================================================
+    function realizarSorteio() {
+        if (participantes.length < 2) {
+            alert("É necessário pelo menos dois participantes!");
+            return;
+        }
 
-    <button onclick="realizarSorteio()">1. Realizar Sorteio e Gerar Links</button>
-    
-    <hr>
-    
-    <h3>2. Links Prontos para Envio (Copie e Cole no WhatsApp):</h3>
-    <div id="links-de-envio">
-        <p>Clique no botão acima para iniciar.</p>
-    </div>
+        // Reseta os sorteios
+        participantes.forEach(p => p.amigoSecreto = "");
 
-    <script>
-        // =======================================================
-        // 1. DADOS INICIAIS (PREENCHA AQUI!)
-        // O número de WhatsApp deve estar no formato internacional: 55 DDD NÚMERO
-        // Exemplo: 55 84 987654321
-        // =======================================================
-        const participantes = [
-            { nome: "Ana Clara", zap: "558496634604", amigoSecreto: "" },
-            { nome: "Dante Marques", zap: "558496013344", amigoSecreto: "" },
-            { nome: "Kallyny", zap: "558487938890", amigoSecreto: "" },
-            { nome: "Rodolfo", zap: "558499303180", amigoSecreto: "" },
-            { nome: "Júlia", zap: "", amigoSecreto: "" }, // Sem número fornecido
-            { nome: "Ana Maria", zap: "558499101380", amigoSecreto: "" },
-            { nome: "Ronaldo", zap: "558487464446", amigoSecreto: "" },
-            { nome: "Ton", zap: "558496636715", amigoSecreto: "" },
-            { nome: "Anny Kelly", zap: "558487848323", amigoSecreto: "" },
-            { nome: "Gláucio", zap: "558496104467", amigoSecreto: "" },
-            { nome: "Ayô", zap: "", amigoSecreto: "" }  // Sem número fornecido
-        ];
+        const nomes = participantes.map(p => p.nome);
         
-        // =======================================================
-        // 2. CONFIGURAÇÃO DA URL DE REVELAÇÃO (MUDE AQUI!)
-        // Se você hospedar no GitHub Pages, seria algo como: 
-        // "https://seuusuario.github.io/seuprojeto/revelacao.html"
-        // Se for local (para testes), use: "revelacao.html"
-        // =======================================================
-        const urlBaseRevelacao = "revelacao.html"; 
+        // Nomes que precisam ser sorteados para alguém
+        let nomesDisponiveis = [...nomes];
 
-        // =======================================================
-        // FUNÇÃO DE SORTEIO (Não precisa mudar aqui)
-        // =======================================================
-        function realizarSorteio() {
-            if (participantes.length < 2) {
-                alert("É necessário pelo menos dois participantes!");
-                return;
-            }
+        // 1. APLICAR REGRAS FIXAS
+        
+        // Júlia tira Ana Clara
+        const julia = participantes.find(p => p.nome === "Júlia");
+        julia.amigoSecreto = "Ana Maria";
+        // Remove Ana Clara dos nomes disponíveis para ser sorteada
+        nomesDisponiveis.splice(nomesDisponiveis.indexOf("Ana Maria"), 1);
 
-            const nomes = participantes.map(p => p.nome);
-            let sorteados = [...nomes];
+        // Rodolfo tira Ronaldo
+        const rodolfo = participantes.find(p => p.nome === "Rodolfo");
+        rodolfo.amigoSecreto = "Ronaldo";
+        // Remove Ronaldo dos nomes disponíveis para ser sorteado
+        nomesDisponiveis.splice(nomesDisponiveis.indexOf("Ronaldo"), 1);
+        
+        // Pessoas que já tiveram seu Amigo Secreto definido e não precisam ser sorteadas:
+        const pessoasJaSorteadas = ["Júlia", "Rodolfo"];
 
-            // Algoritmo de sorteio (Fisher-Yates modificado)
-            participantes.forEach(p => p.amigoSecreto = ""); // Limpa resultados anteriores
+        // 2. REALIZAR SORTEIO ALEATÓRIO PARA O RESTANTE
+
+        const participantesParaSortear = participantes.filter(p => !pessoasJaSorteadas.includes(p.nome));
+        const nomesQueVaoSortear = participantesParaSortear.map(p => p.nome);
+        
+        let sucesso = false;
+        let tentativas = 0;
+        
+        while (!sucesso && tentativas < 100) {
+            tentativas++;
+            // Embaralha apenas os nomes que ainda estão disponíveis
+            const listaEmbaralhada = [...nomesDisponiveis].sort(() => 0.5 - Math.random());
             
-            let sucesso = false;
-            let tentativas = 0;
-
-            // Tenta sortear no máximo 100 vezes para evitar loop infinito em casos raros/impossíveis
-            while (!sucesso && tentativas < 100) {
-                tentativas++;
-                const listaEmbaralhada = [...nomes].sort(() => 0.5 - Math.random());
-                sucesso = true;
+            sucesso = true;
+            
+            // Verifica se o sorteio aleatório é válido (ninguém tira a si mesmo)
+            for (let i = 0; i < participantesParaSortear.length; i++) {
+                const pessoa = participantesParaSortear[i];
+                const sorteado = listaEmbaralhada[i];
                 
-                for (let i = 0; i < participantes.length; i++) {
-                    // Verifica se a pessoa não tirou a si mesma
-                    if (participantes[i].nome === listaEmbaralhada[i]) {
-                        sucesso = false;
-                        break; 
-                    }
-                }
-
-                if (sucesso) {
-                    for (let i = 0; i < participantes.length; i++) {
-                        participantes[i].amigoSecreto = listaEmbaralhada[i];
-                    }
+                if (pessoa.nome === sorteado) {
+                    sucesso = false; // Falhou, tenta novamente
+                    break; 
                 }
             }
-            
-            if (tentativas >= 100) {
-                alert("Falha no sorteio após 100 tentativas. Tente novamente.");
-                return;
-            }
 
-            // GERAÇÃO DOS LINKS
-            gerarLinksWhatsApp();
+            if (sucesso) {
+                // Se for válido, atribui os sorteados restantes
+                for (let i = 0; i < participantesParaSortear.length; i++) {
+                    participantesParaSortear[i].amigoSecreto = listaEmbaralhada[i];
+                }
+            }
+        }
+        
+        if (tentativas >= 100) {
+            alert("Falha no sorteio aleatório após 100 tentativas. Tente novamente.");
+            return;
         }
 
-        function gerarLinksWhatsApp() {
-            const container = document.getElementById('links-de-envio');
-            container.innerHTML = ''; // Limpa resultados anteriores
-
-            participantes.forEach(p => {
-                // O nome do amigo secreto é anexado à URL após o # (hash)
-                const linkRevelacao = `${urlBaseRevelacao}#${encodeURIComponent(p.amigoSecreto)}`;
-                
-                // Mensagem a ser enviada pelo WhatsApp (codificada para URL)
-                const mensagem = `🥳 Olá, ${p.nome}! Seu link para descobrir seu Amigo Secreto é: ${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`; // %0A é uma quebra de linha no WhatsApp
-                
-                // Cria o link final wa.me
-                const linkWhatsApp = `https://wa.me/${p.zap}?text=${mensagem}`;
-
-                // Exibe o link na tela
-                const divElement = document.createElement('div');
-                divElement.classList.add('link-pronto');
-                divElement.innerHTML = `
-                    <p><strong>Para: ${p.nome}</strong> (Enviar para ${p.zap})</p>
-                    <a href="${linkWhatsApp}" target="_blank">Clique para Abrir o WhatsApp e Enviar</a>
-                    <p style="font-size: 0.8em; margin-top: 5px;">Link Gerado: <code>${linkRevelacao}</code></p>
-                `;
-                container.appendChild(divElement);
-            });
+        // GERAÇÃO DOS LINKS
+        gerarLinksWhatsApp();
+    }
+    
+    // =======================================================
+    // 4. LÓGICA DE DESTINATÁRIO (Para crianças)
+    // =======================================================
+    function getRecipientInfo(participante) {
+        let recipientName = participante.nome;
+        let recipientZap = participante.zap;
+        let drawnName = participante.amigoSecreto;
+        
+        // ----------------------------------------------------
+        // Lógica de Ayô (Pais: Gláucio e Anny Kelly)
+        if (participante.nome === "Ayô") {
+            const glauzio = participantes.find(p => p.nome === "Gláucio");
+            const anny = participantes.find(p => p.nome === "Anny Kelly");
+            
+            if (drawnName === "Gláucio") {
+                // Tira Gláucio, envia para Anny Kelly
+                recipientName = `Anny Kelly (Responsável por Ayô)`;
+                recipientZap = anny.zap;
+            } else if (drawnName === "Anny Kelly") {
+                // Tira Anny Kelly, envia para Gláucio
+                recipientName = `Gláucio (Responsável por Ayô)`;
+                recipientZap = glauzio.zap;
+            } else {
+                // Tira outra pessoa, envia para Gláucio (o primário definido no array)
+                recipientName = `Gláucio (Responsável por Ayô)`;
+                recipientZap = glauzio.zap;
+            }
         }
-    </script>
-</body>
-</html>
+
+        // ----------------------------------------------------
+        // Lógica de Ravi (Pais: Rodolfo e Enviar para Ana Clara em caso de conflito)
+        if (participante.nome === "Ravi") {
+            const rodolfo = participantes.find(p => p.nome === "Rodolfo");
+            const anamaria = participantes.find(p => p.nome === "Ana Maria");
+
+            if (drawnName === "Rodolfo") {
+                // Tira Rodolfo, envia para Ana Clara
+                recipientName = `Ana Maria (Responsável por Ravi)`;
+                recipientZap = anamaria.zap;
+            } else {
+                // Tira outra pessoa, envia para Rodolfo (o primário definido no array)
+                recipientName = `Rodolfo (Responsável por Ravi)`;
+                recipientZap = rodolfo.zap;
+            }
+        }
+
+        // ----------------------------------------------------
+        // Lógica de Júlia (Apenas para garantir que o link seja enviado a um adulto)
+        if (participante.nome === "Júlia") {
+            // Assume-se que o ZAP de Júlia já é do responsável (Ana Clara no array)
+            const anamaria = participantes.find(p => p.nome === "Rodolfo");
+            recipientName = `Responsável por Júlia`;
+            recipientZap = rodolfo.zap;
+        }
+
+        return { recipientName, recipientZap, drawnName };
+    }
+    
+    // =======================================================
+    // 5. FUNÇÃO DE GERAÇÃO E EXIBIÇÃO DE LINKS
+    // =======================================================
+    function gerarLinksWhatsApp() {
+        const container = document.getElementById('links-de-envio');
+        container.innerHTML = ''; // Limpa resultados anteriores
+
+        participantes.forEach(p => {
+            const { recipientName, recipientZap, drawnName } = getRecipientInfo(p);
+            
+            // O nome do amigo secreto é anexado à URL após o # (hash)
+            const linkRevelacao = `${urlBaseRevelacao}#${encodeURIComponent(drawnName)}`;
+            
+            // Mensagem a ser enviada pelo WhatsApp (codificada para URL)
+            const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo o link do Amigo Secreto de *${p.nome}*. O Amigo Secreto sorteado para ${p.nome} é: ${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`; // %0A é uma quebra de linha
+            
+            // Cria o link final wa.me
+            const linkWhatsApp = `https://wa.me/${recipientZap}?text=${encodeURIComponent(mensagem)}`;
+
+            // Exibe o link na tela
+            const divElement = document.createElement('div');
+            divElement.classList.add('link-pronto');
+            divElement.innerHTML = `
+                <p><strong>Para: ${p.nome}</strong> | Destinatário do Zap: <strong>${recipientName}</strong></p>
+                <a href="${linkWhatsApp}" target="_blank">Clique para Abrir o WhatsApp e Enviar</a>
+                <p style="font-size: 0.8em; margin-top: 5px;">Link Gerado: <code>${linkRevelacao}</code></p>
+            `;
+            container.appendChild(divElement);
+        });
+    }
+</script>
