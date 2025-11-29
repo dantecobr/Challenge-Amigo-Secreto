@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Sorteio de Amigo Secreto</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .participante-item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+        .link-pronto { background-color: #e6ffe6; padding: 10px; margin-top: 10px; border-radius: 5px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; }
+        h3 { border-bottom: 2px solid #007bff; padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>Administração do Amigo Secreto</h1>
+
+    <p><strong>ATENÇÃO:</strong> Antes de sortear, certifique-se de que a variável <code>urlBaseRevelacao</code> no código JavaScript abaixo está correta (o endereço onde você vai hospedar a página <code>revelacao.html</code>).</p>
+
+    <button onclick="realizarSorteio()">1. Realizar Sorteio e Gerar Links</button>
+    
+    <hr>
+    
+    <h3>2. Links Prontos para Envio (Copie e Cole no WhatsApp):</h3>
+    <div id="links-de-envio">
+        <p>Clique no botão acima para iniciar.</p>
+    </div>
+
+    <script>
+        // =======================================================
+        // 1. DADOS INICIAIS (PREENCHA AQUI!)
+        // O número de WhatsApp deve estar no formato internacional: 55 DDD NÚMERO
+        // Exemplo: 55 84 987654321
+        // =======================================================
+        const participantes = [
+            { nome: "Ana Clara", zap: "558496634604", amigoSecreto: "" },
+            { nome: "Dante Marques", zap: "558496013344", amigoSecreto: "" },
+            { nome: "Kallyny", zap: "558487938890", amigoSecreto: "" },
+            { nome: "Rodolfo", zap: "558499303180", amigoSecreto: "" },
+            { nome: "Júlia", zap: "", amigoSecreto: "" }, // Sem número fornecido
+            { nome: "Ana Maria", zap: "558499101380", amigoSecreto: "" },
+            { nome: "Ronaldo", zap: "558487464446", amigoSecreto: "" },
+            { nome: "Ton", zap: "558496636715", amigoSecreto: "" },
+            { nome: "Anny Kelly", zap: "558487848323", amigoSecreto: "" },
+            { nome: "Gláucio", zap: "558496104467", amigoSecreto: "" },
+            { nome: "Ayô", zap: "", amigoSecreto: "" }  // Sem número fornecido
+        ];
+        
+        // =======================================================
+        // 2. CONFIGURAÇÃO DA URL DE REVELAÇÃO (MUDE AQUI!)
+        // Se você hospedar no GitHub Pages, seria algo como: 
+        // "https://seuusuario.github.io/seuprojeto/revelacao.html"
+        // Se for local (para testes), use: "revelacao.html"
+        // =======================================================
+        const urlBaseRevelacao = "revelacao.html"; 
+
+        // =======================================================
+        // FUNÇÃO DE SORTEIO (Não precisa mudar aqui)
+        // =======================================================
+        function realizarSorteio() {
+            if (participantes.length < 2) {
+                alert("É necessário pelo menos dois participantes!");
+                return;
+            }
+
+            const nomes = participantes.map(p => p.nome);
+            let sorteados = [...nomes];
+
+            // Algoritmo de sorteio (Fisher-Yates modificado)
+            participantes.forEach(p => p.amigoSecreto = ""); // Limpa resultados anteriores
+            
+            let sucesso = false;
+            let tentativas = 0;
+
+            // Tenta sortear no máximo 100 vezes para evitar loop infinito em casos raros/impossíveis
+            while (!sucesso && tentativas < 100) {
+                tentativas++;
+                const listaEmbaralhada = [...nomes].sort(() => 0.5 - Math.random());
+                sucesso = true;
+                
+                for (let i = 0; i < participantes.length; i++) {
+                    // Verifica se a pessoa não tirou a si mesma
+                    if (participantes[i].nome === listaEmbaralhada[i]) {
+                        sucesso = false;
+                        break; 
+                    }
+                }
+
+                if (sucesso) {
+                    for (let i = 0; i < participantes.length; i++) {
+                        participantes[i].amigoSecreto = listaEmbaralhada[i];
+                    }
+                }
+            }
+            
+            if (tentativas >= 100) {
+                alert("Falha no sorteio após 100 tentativas. Tente novamente.");
+                return;
+            }
+
+            // GERAÇÃO DOS LINKS
+            gerarLinksWhatsApp();
+        }
+
+        function gerarLinksWhatsApp() {
+            const container = document.getElementById('links-de-envio');
+            container.innerHTML = ''; // Limpa resultados anteriores
+
+            participantes.forEach(p => {
+                // O nome do amigo secreto é anexado à URL após o # (hash)
+                const linkRevelacao = `${urlBaseRevelacao}#${encodeURIComponent(p.amigoSecreto)}`;
+                
+                // Mensagem a ser enviada pelo WhatsApp (codificada para URL)
+                const mensagem = `🥳 Olá, ${p.nome}! Seu link para descobrir seu Amigo Secreto é: ${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`; // %0A é uma quebra de linha no WhatsApp
+                
+                // Cria o link final wa.me
+                const linkWhatsApp = `https://wa.me/${p.zap}?text=${mensagem}`;
+
+                // Exibe o link na tela
+                const divElement = document.createElement('div');
+                divElement.classList.add('link-pronto');
+                divElement.innerHTML = `
+                    <p><strong>Para: ${p.nome}</strong> (Enviar para ${p.zap})</p>
+                    <a href="${linkWhatsApp}" target="_blank">Clique para Abrir o WhatsApp e Enviar</a>
+                    <p style="font-size: 0.8em; margin-top: 5px;">Link Gerado: <code>${linkRevelacao}</code></p>
+                `;
+                container.appendChild(divElement);
+            });
+        }
+    </script>
+</body>
+</html>
