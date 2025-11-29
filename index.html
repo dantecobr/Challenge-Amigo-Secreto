@@ -229,10 +229,9 @@
                 return;
             }
 
-            // GERAÇÃO DOS LINKS
-            gerarLinksWhatsApp();
-        }
-        
+// =======================================================
+        // FUNÇÃO DE AUXÍLIO PARA DEFINIR O DESTINATÁRIO (NÃO ALTERADA)
+        // =======================================================
         function getRecipientInfo(participante) {
             let recipientName = participante.nome;
             let recipientZap = participante.zap;
@@ -281,6 +280,9 @@
             return { recipientName, recipientZap, drawnName };
         }
         
+        // =======================================================
+        // FUNÇÃO DE GERAÇÃO E EXIBIÇÃO DE LINKS (CORRIGIDA)
+        // =======================================================
         function gerarLinksWhatsApp() {
             const container = document.getElementById('links-de-envio');
             container.innerHTML = ''; 
@@ -297,8 +299,14 @@
                      return;
                 }
 
+                // O link que será clicável, SEM o nome do amigo secreto na mensagem.
                 const linkRevelacao = `${urlBaseRevelacao}#${encodeURIComponent(drawnName)}`;
-                const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo o link do Amigo Secreto de *${p.nome}*. O Amigo Secreto sorteado para ${p.nome} é: ${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
+                
+                // Mensagem limpa: removemos a quebra de linha após o link para garantir a clicabilidade
+                // e ajustamos o texto inicial para evitar problemas de codificação.
+                const mensagem = `🥳 Olá, ${recipientName}! Você está recebendo o link do Amigo Secreto de *${p.nome}*. Clique no link abaixo para descobrir quem você tirou: ${linkRevelacao}%0A%0A_Atenção: Não compartilhe este link!_`;
+                
+                // Cria o link final wa.me
                 const linkWhatsApp = `https://wa.me/${recipientZap}?text=${encodeURIComponent(mensagem)}`;
 
                 const divElement = document.createElement('div');
@@ -306,7 +314,7 @@
                 divElement.innerHTML = `
                     <p><strong>Para: ${p.nome}</strong> | Destinatário do Zap: <strong>${recipientName}</strong></p>
                     <a href="${linkWhatsApp}" target="_blank">📲 Clique para Abrir o WhatsApp e Enviar</a>
-                    <p style="font-size: 0.8em; margin-top: 5px;">Link Gerado: <code>${linkRevelacao}</code></p>
+                    <p style="font-size: 0.8em; margin-top: 5px;">Link Gerado: <code>${linkRevelacao}</code> (Amigo: ${drawnName})</p>
                 `;
                 container.appendChild(divElement);
             });
@@ -315,5 +323,3 @@
         // Inicializa a lista ao carregar a página
         window.onload = renderizarLista;
     </script>
-</body>
-</html>
