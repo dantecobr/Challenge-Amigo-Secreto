@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seu Amigo Secreto Revelado!</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            background-color: #f4f7f6;
+            background-image: linear-gradient(135deg, #f4f7f6 0%, #e0e0e0 100%);
+        }
+        .revelacao-card {
+            text-align: center;
+            background-color: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            /* Animação para a caixa de revelação aparecer com efeito */
+            transform: scale(0);
+            animation: bounceIn 1s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            color: #d9534f; /* Vermelho/Coral */
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+        #nome-revelado {
+            font-size: 4em;
+            font-weight: 800;
+            color: #5cb85c; /* Verde */
+            margin-top: 10px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #subtexto {
+            color: #6c757d;
+            margin-top: 15px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="revelacao-card">
+        <h1>🎉 PARABÉNS! SEU AMIGO SECRETO É:</h1>
+        <div id="nome-revelado">...</div>
+        <p id="subtexto">Guarde o segredo e prepare um presente incrível!</p>
+    </div>
+
+    <script>
+        function revelarAmigoSecreto() {
+            const nomeElement = document.getElementById('nome-revelado');
+            
+            // Pega a parte da URL após o # (hash)
+            const hash = window.location.hash;
+
+            if (hash && hash.length > 1) {
+                // Remove o '#' inicial e decodifica o nome
+                const amigoSecreto = decodeURIComponent(hash.substring(1));
+                nomeElement.textContent = amigoSecreto.toUpperCase(); // Exibe em maiúsculas para destaque
+            } else {
+                nomeElement.innerHTML = "❌ ERRO: Link de revelação inválido ou incompleto.";
+                nomeElement.style.color = '#dc3545'; // Cor de erro
+                document.getElementById('subtexto').textContent = "Por favor, verifique se o link que você recebeu está completo e tente novamente.";
+            }
+        }
+
+        // Chama a função quando a página carrega
+        window.onload = revelarAmigoSecreto;
+    </script>
+</body>
+</html>
