@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seu Amigo Secreto!</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            background-color: #f4f7f6;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #d9534f;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        #nome-revelado {
+            font-size: 3em;
+            font-weight: bold;
+            color: #5cb85c; /* Cor verde para destaque */
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎉 Parabéns! Seu Amigo Secreto é:</h1>
+        <div id="nome-revelado">... carregando ...</div>
+        <p style="margin-top: 30px;">Guarde o segredo e boas festas!</p>
+    </div>
+
+    <script>
+        function revelarAmigoSecreto() {
+            const nomeElement = document.getElementById('nome-revelado');
+            
+            // Pega a parte da URL após o # (hash)
+            const hash = window.location.hash;
+
+            if (hash) {
+                // Remove o '#' inicial e decodifica o nome
+                const amigoSecreto = decodeURIComponent(hash.substring(1));
+                nomeElement.textContent = amigoSecreto;
+            } else {
+                nomeElement.innerHTML = "Link Inválido ou Incompleto.";
+            }
+        }
+
+        // Chama a função quando a página carrega
+        window.onload = revelarAmigoSecreto;
+    </script>
+</body>
+</html>
